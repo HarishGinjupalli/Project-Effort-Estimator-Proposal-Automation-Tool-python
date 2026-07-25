@@ -16,5 +16,5 @@ git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
-git remote add origin https://github.com/HarishGinjupalli/python-projects-project-effort-estimator.git
+git remote add origin https://github.com/HarishGinjupalli/Project-Effort-Estimator-Proposal-Automation-Tool-python.git
 git push -u origin main --force
