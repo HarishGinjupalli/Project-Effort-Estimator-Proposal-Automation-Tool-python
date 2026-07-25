@@ -18,3 +18,20 @@ git commit -m "Initial commit"
 git branch -M main
 git remote add origin https://github.com/HarishGinjupalli/Project-Effort-Estimator-Proposal-Automation-Tool-python.git
 git push -u origin main --force
+
+Check your current remote:
+git remote -v
+You'll probably see something like:
+origin  https://github.com/HarishGinjupalli/python-projects-project-effort-estimator.git (fetch)
+origin  https://github.com/HarishGinjupalli/python-projects-project-effort-estimator.git (push)
+
+Step 2: Change the remote URL
+Instead of adding a new origin, update the existing one:
+git remote set-url origin https://github.com/HarishGinjupalli/Project-Effort-Estimator-Proposal-Automation-Tool-python.git
+
+Verify:
+git remote -v
+It should now show the new URL.
+
+Step 3: Push again
+git push -u origin main --force
