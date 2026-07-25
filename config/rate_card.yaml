@@ -1,0 +1,50 @@
+# rate_card.yaml
+# Central configuration for effort estimation and pricing.
+# Update rates/multipliers here — no code changes required.
+
+currency: INR
+
+# Daily billing rate per role (in the currency above)
+# Covers common roles seen across delivery/consulting requirement exports.
+# Role matching is case-insensitive and exact; unmapped roles fall back to
+# default_role_rate below (with a warning) rather than failing the run.
+roles:
+  Python Developer: 8000
+  Senior Consultant: 14000
+  Business Analyst: 9500
+  QA Engineer: 6500
+  Project Manager: 15000
+  Data Engineer: 10500
+  BI Developer: 9000
+  Security Analyst: 11000
+  Solution Architect: 16000
+  DevOps Engineer: 10000
+  Database Admin: 9500
+  UX Designer: 8500
+  Integration Developer: 9500
+  Product Owner: 13000
+  Delivery Manager: 15500
+
+# Multiplier applied to base effort (person-days) based on requirement complexity
+# Unmapped complexity values fall back to default_complexity below.
+complexity_multiplier:
+  Low: 1.0
+  Medium: 1.5
+  High: 2.2
+
+# Used when a requirement's role isn't found in the roles list above.
+# Keeps the tool usable on any CSV without crashing on unfamiliar job titles.
+default_role_rate: 9000
+
+# Used when a requirement's complexity value isn't one of the keys above.
+default_complexity: Medium
+
+# Base effort in person-days assumed for a "Low" complexity requirement
+# before the complexity multiplier is applied
+base_effort_days: 2.0
+
+# Contingency added on top of the calculated effort to absorb scope risk
+risk_buffer_percent: 12
+
+# Tax/overhead applied on top of the final cost (set to 0 to disable)
+overhead_percent: 5
