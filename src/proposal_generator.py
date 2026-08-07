@@ -35,6 +35,12 @@ def _add_heading(doc: Document, text: str, size: int = 16, color: RGBColor = HEA
     return p
 
 
+def _format_complexity(item) -> str:
+    if item.complexity_was_defaulted:
+        return f"{item.effective_complexity} (defaulted from '{item.complexity}')"
+    return item.effective_complexity
+
+
 def _style_table_header(row):
     for cell in row.cells:
         cell.paragraphs[0].runs[0].bold = True
@@ -113,7 +119,7 @@ def generate_proposal(
         row[0].text = item.requirement_id
         row[1].text = item.description
         row[2].text = item.role
-        row[3].text = item.complexity
+        row[3].text = _format_complexity(item)
 
     doc.add_paragraph()
 
@@ -194,7 +200,9 @@ def generate_proposal(
     for term in project_config.proposal_terms:
         doc.add_paragraph(term, style="List Bullet")
 
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    output_dir = os.path.dirname(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
     try:
         doc.save(output_path)
     finally:

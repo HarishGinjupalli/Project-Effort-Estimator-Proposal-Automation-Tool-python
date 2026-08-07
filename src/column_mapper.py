@@ -17,6 +17,14 @@ import pandas as pd
 
 # Ranked candidate column names (case-insensitive) for each required field.
 # First match wins.
+# Maps logical field names to the CLI flag prefix (e.g. --id-col, --desc-col).
+CLI_FLAG_NAMES = {
+    "requirement_id": "id",
+    "description": "desc",
+    "role": "role",
+    "complexity": "complexity",
+}
+
 COLUMN_ALIASES = {
     "requirement_id": [
         "requirement_id", "req_id", "id", "story_id", "ticket_id", "item_id",
@@ -88,7 +96,7 @@ def resolve_columns(
             missing.append(
                 f"Couldn't auto-detect a '{field}' column. Tried: "
                 f"{COLUMN_ALIASES[field]}. Available columns: {list(df.columns)}. "
-                f"Pass --{field.replace('_', '-')}-col to specify it manually."
+                f"Pass --{CLI_FLAG_NAMES[field]}-col to specify it manually."
             )
 
     if missing:
@@ -114,8 +122,27 @@ def normalize_dataframe(df: pd.DataFrame, column_map: Dict[str, str]) -> pd.Data
     # the exact target name but maps from a different source column.
     normalized = normalized.rename(columns=rename_map)
 
-    # Ensure required fields have no blank/NaN values
-    for field in ["requirement_id", "requirement_description", "role", "complexity"]:
-        normalized[field] = normalized[field].astype(str).str.strip()
+    for col in ["requirement_id", "requirement_description", "role", "complexity"]:
+        normalized[col] = normalized[col].astype(str).str.strip()
 
+    validate_required_fields(normalized)
     return normalized
+
+
+def _is_blank(value) -> bool:
+    if pd.isna(value):
+        return True
+    return str(value).strip().lower() in ("", "nan", "none", "null")
+
+
+def validate_required_fields(df: pd.DataFrame) -> None:
+    """Raise ColumnMappingError if any required field is blank or NaN."""
+    required = ["requirement_id", "requirement_description", "role", "complexity"]
+    errors = []
+    for idx, row in df.iterrows():
+        row_num = int(idx) + 2  # 1-based row number, accounting for header
+        for field in required:
+            if _is_blank(row[field]):
+                errors.append(f"Row {row_num}: '{field}' is blank or missing")
+    if errors:
+        raise ColumnMappingError("\n".join(errors))

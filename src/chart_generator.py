@@ -6,8 +6,7 @@ requirements. Uses matplotlib's non-interactive 'Agg' backend so it runs
 headless (no display needed) — required for CLI/server use.
 
 Charts are saved to a temp directory and returned as file paths; the
-proposal generator embeds them, then the caller is responsible for cleanup
-(main.py handles this).
+proposal generator embeds them and cleans up the temp directory when done.
 """
 
 import matplotlib
@@ -75,7 +74,7 @@ def generate_effort_by_complexity_chart(summary: EstimateSummary, output_path: s
     """Pie chart: share of total effort (person-days) by complexity level."""
     totals = defaultdict(float)
     for item in summary.line_items:
-        totals[item.complexity] += item.effort_days
+        totals[item.effective_complexity] += item.effort_days
     # Keep a stable, sensible order when the standard levels are present
     order = ["Low", "Medium", "High"]
     labels = sorted(totals.keys(), key=lambda x: order.index(x) if x in order else 99)

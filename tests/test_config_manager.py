@@ -79,6 +79,30 @@ def test_load_rate_card_invalid_risk_buffer(tmp_path):
         load_rate_card(path)
 
 
+def test_load_rate_card_invalid_base_effort(tmp_path):
+    bad = dict(VALID_RATE_CARD)
+    bad["base_effort_days"] = 0
+    path = write_yaml(tmp_path, "bad_rate_card.yaml", bad)
+    with pytest.raises(ConfigError, match="base_effort_days"):
+        load_rate_card(path)
+
+
+def test_load_rate_card_invalid_overhead(tmp_path):
+    bad = dict(VALID_RATE_CARD)
+    bad["overhead_percent"] = -5
+    path = write_yaml(tmp_path, "bad_rate_card.yaml", bad)
+    with pytest.raises(ConfigError, match="overhead_percent"):
+        load_rate_card(path)
+
+
+def test_load_rate_card_invalid_default_role_rate(tmp_path):
+    bad = dict(VALID_RATE_CARD)
+    bad["default_role_rate"] = -100
+    path = write_yaml(tmp_path, "bad_rate_card.yaml", bad)
+    with pytest.raises(ConfigError, match="default_role_rate"):
+        load_rate_card(path)
+
+
 def test_load_project_config_valid(tmp_path):
     path = write_yaml(tmp_path, "config.yaml", VALID_PROJECT_CONFIG)
     config = load_project_config(path)

@@ -7,7 +7,7 @@ missing-column error reporting, and normalization.
 import pandas as pd
 import pytest
 
-from src.column_mapper import resolve_columns, normalize_dataframe, ColumnMappingError
+from src.column_mapper import resolve_columns, normalize_dataframe, validate_required_fields, ColumnMappingError
 
 
 def test_resolve_columns_auto_detect_standard_schema():
@@ -69,6 +69,12 @@ def test_resolve_columns_missing_required_field():
         resolve_columns(df)
 
 
+def test_resolve_columns_error_suggests_correct_cli_flags():
+    df = pd.DataFrame(columns=["foo"])
+    with pytest.raises(ColumnMappingError, match="--id-col"):
+        resolve_columns(df)
+
+
 def test_normalize_dataframe_renames_and_preserves_extra_columns():
     df = pd.DataFrame(
         {
@@ -86,3 +92,16 @@ def test_normalize_dataframe_renames_and_preserves_extra_columns():
     assert list(normalized["role"]) == ["Python Developer"]
     # Original columns not part of the mapping stay intact
     assert "epic" in normalized.columns
+
+
+def test_validate_required_fields_rejects_blank_values():
+    df = pd.DataFrame(
+        {
+            "requirement_id": ["REQ-001"],
+            "requirement_description": ["Valid"],
+            "role": [""],
+            "complexity": ["Low"],
+        }
+    )
+    with pytest.raises(ColumnMappingError, match="blank or missing"):
+        validate_required_fields(df)
