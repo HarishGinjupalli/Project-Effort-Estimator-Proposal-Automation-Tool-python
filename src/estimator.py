@@ -34,6 +34,7 @@ class RequirementEstimate:
     description: str
     role: str
     complexity: str
+    effective_complexity: str
     effort_days: float
     daily_rate: float
     cost: float
@@ -69,7 +70,7 @@ def load_requirements(
     from common aliases (see column_mapper.py); pass the *_col arguments
     to override detection for a specific CSV.
     """
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, encoding="utf-8-sig")
 
     if df.empty:
         raise EstimationError("Requirements CSV has no rows to estimate")
@@ -87,7 +88,10 @@ def load_requirements(
         f"complexity: '{column_map['complexity']}'"
     )
 
-    return normalize_dataframe(df, column_map)
+    try:
+        return normalize_dataframe(df, column_map)
+    except ColumnMappingError as e:
+        raise EstimationError(str(e))
 
 
 def _resolve_role_rate(role: str, rate_card: RateCard, strict: bool) -> tuple:
@@ -157,6 +161,7 @@ def estimate_requirement(row, rate_card: RateCard, strict: bool = False) -> Requ
         description=row["requirement_description"],
         role=role,
         complexity=complexity,
+        effective_complexity=effective_complexity,
         effort_days=effort_days,
         daily_rate=daily_rate,
         cost=cost,

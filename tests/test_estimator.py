@@ -86,6 +86,7 @@ def test_estimate_requirement_unknown_complexity_falls_back_to_default(rate_card
     )
     result = estimate_requirement(row, rate_card)
     assert result.complexity_was_defaulted is True
+    assert result.effective_complexity == "Medium"
     # defaulted to "Medium" -> multiplier 1.5 -> 2.0 * 1.5 = 3.0 days
     assert result.effort_days == 3.0
 
@@ -192,3 +193,14 @@ def test_load_requirements_valid(tmp_path):
     df = load_requirements(str(csv_path))
     assert len(df) == 1
     assert df.iloc[0]["role"] == "Python Developer"
+
+
+def test_load_requirements_blank_field_raises(tmp_path):
+    csv_path = tmp_path / "blank_role.csv"
+    csv_path.write_text(
+        "requirement_id,requirement_description,role,complexity\n"
+        "REQ-001,Test task,,Low\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(EstimationError, match="blank or missing"):
+        load_requirements(str(csv_path))

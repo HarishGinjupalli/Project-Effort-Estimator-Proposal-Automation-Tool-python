@@ -9,7 +9,7 @@ touches YAML directly and always gets validated, typed config back.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional
 import yaml
 import os
 
@@ -26,8 +26,8 @@ class RateCard:
     base_effort_days: float
     risk_buffer_percent: float
     overhead_percent: float
-    default_role_rate: float = None
-    default_complexity: str = None
+    default_role_rate: Optional[float] = None
+    default_complexity: Optional[str] = None
 
 
 @dataclass
@@ -73,6 +73,19 @@ def load_rate_card(path: str) -> RateCard:
     if not (0 <= raw["risk_buffer_percent"] <= 100):
         raise ConfigError("risk_buffer_percent must be between 0 and 100")
 
+    base_effort_days = float(raw["base_effort_days"])
+    if base_effort_days <= 0:
+        raise ConfigError("base_effort_days must be greater than 0")
+
+    overhead_percent = float(raw.get("overhead_percent", 0))
+    if not (0 <= overhead_percent <= 100):
+        raise ConfigError("overhead_percent must be between 0 and 100")
+
+    default_role_rate = raw.get("default_role_rate")
+    if default_role_rate is not None:
+        if not isinstance(default_role_rate, (int, float)) or default_role_rate <= 0:
+            raise ConfigError(f"Invalid default_role_rate: {default_role_rate}")
+
     default_complexity = raw.get("default_complexity")
     if default_complexity and default_complexity not in raw["complexity_multiplier"]:
         raise ConfigError(
@@ -84,10 +97,10 @@ def load_rate_card(path: str) -> RateCard:
         currency=raw["currency"],
         roles=raw["roles"],
         complexity_multiplier=raw["complexity_multiplier"],
-        base_effort_days=float(raw["base_effort_days"]),
+        base_effort_days=base_effort_days,
         risk_buffer_percent=float(raw["risk_buffer_percent"]),
-        overhead_percent=float(raw.get("overhead_percent", 0)),
-        default_role_rate=raw.get("default_role_rate"),
+        overhead_percent=overhead_percent,
+        default_role_rate=default_role_rate,
         default_complexity=default_complexity,
     )
 

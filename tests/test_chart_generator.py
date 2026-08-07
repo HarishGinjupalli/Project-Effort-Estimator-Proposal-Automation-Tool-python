@@ -25,6 +25,7 @@ def _make_summary(n_items=5):
             description=f"Requirement number {i} description text",
             role=roles[i % len(roles)],
             complexity=complexities[i % len(complexities)],
+            effective_complexity=complexities[i % len(complexities)],
             effort_days=2.0 + i,
             daily_rate=8000,
             cost=(2.0 + i) * 8000,

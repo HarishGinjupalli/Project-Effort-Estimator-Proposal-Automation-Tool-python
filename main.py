@@ -57,12 +57,18 @@ def parse_args():
 
 def main():
     args = parse_args()
-    logger = setup_logger()
+
+    try:
+        project_config = load_project_config(args.config)
+    except ConfigError as e:
+        print(f"\nError: {e}")
+        sys.exit(1)
+
+    logger = setup_logger(log_file=project_config.log_file)
 
     try:
         logger.info("Loading configuration...")
         rate_card = load_rate_card(args.rate_card)
-        project_config = load_project_config(args.config)
 
         logger.info(f"Loading requirements from {args.input}...")
         df = load_requirements(
